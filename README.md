@@ -25,7 +25,7 @@
 
 <div align="center">
   <!-- PLACEHOLDER FOR TERMINAL INTERFACE SCREENSHOT -->
-  <img src="Assets/tool_logo.png" alt="Cat Paw Terminal Interface" width="700">
+  <img src="Assets/tool_logo.png" alt="Cat Paw Terminal Interface" width="100%">
   <p><i>Cat Paw's Beautiful Interactive Terminal Interface</i></p>
 </div>
 
@@ -48,7 +48,7 @@ Cat Paw achieves incredibly high accuracy and low false-positive rates by combin
 
 <div align="center">
   <!-- PLACEHOLDER FOR SCAN OUTPUT SCREENSHOT -->
-  <img src="Assets/tool_interface.png" alt="Cat Paw Scan Output Table" width="700">
+  <img src="Assets/tool_interface.png" alt="Cat Paw Scan Output Table" width="100%">
   <p><i>Professional, Aggregated Suspicious Indicators Report</i></p>
 </div>
 
