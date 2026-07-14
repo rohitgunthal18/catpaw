@@ -1,0 +1,170 @@
+patterns:
+  - id: "OBF-B64-001"
+    name: "Base64 Decode + Execute Chain"
+    category: "obfuscation"
+    subcategory: "encoded_execution"
+    severity: "critical"
+    weight: 90
+    languages: ["python", "javascript", "powershell", "shell"]
+    description: "Decodes base64 data and immediately executes it — classic obfuscation"
+    user_message: "🔴 OBFUSCATED CODE! This script decodes and runs hidden base64 content — malware hides this way!"
+    match_patterns:
+      - pattern: "b64decode.*exec"
+        type: "regex"
+      - pattern: "base64.*decode.*eval"
+        type: "regex"
+      - pattern: "FromBase64String.*Invoke"
+        type: "regex"
+    mitre_attack: "T1027"
+    false_positive_note: "Legitimate base64 decoding without exec is fine"
+
+  - id: "OBF-B64-002"
+    name: "Base64 Decode (Standalone)"
+    category: "obfuscation"
+    subcategory: "encoding"
+    severity: "low"
+    weight: 20
+    languages: ["python", "javascript", "powershell", "shell"]
+    description: "Decodes base64 data — suspicious when combined with execution"
+    user_message: "ℹ️ This script decodes base64 data — by itself not harmful, but check what it's doing with it"
+    match_patterns:
+      - pattern: "base64\\.b64decode"
+        type: "literal"
+      - pattern: "base64\\.decode"
+        type: "literal"
+    mitre_attack: "T1027"
+    false_positive_note: "Very common in legitimate code for binary data"
+
+  - id: "OBF-MARSH-001"
+    name: "marshal.loads + exec (Binary Code Object)"
+    category: "obfuscation"
+    subcategory: "code_object"
+    severity: "critical"
+    weight: 95
+    languages: ["python"]
+    description: "Loads and executes a marshalled Python code object"
+    user_message: "🔴 DEEPLY HIDDEN CODE! marshal.loads runs pre-compiled Python bytecode — advanced obfuscation technique!"
+    match_patterns:
+      - pattern: "marshal\\.loads"
+        type: "literal"
+      - pattern: "exec.*marshal\\.loads"
+        type: "regex"
+    mitre_attack: "T1027.002"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "OBF-ZLIB-001"
+    name: "zlib Decompress + Execute"
+    category: "obfuscation"
+    subcategory: "compressed_payload"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "Decompresses zlib data and executes it"
+    user_message: "🔴 COMPRESSED PAYLOAD! This script decompresses and runs hidden code — a common evasion technique!"
+    match_patterns:
+      - pattern: "zlib\\.decompress.*exec"
+        type: "regex"
+      - pattern: "exec.*zlib\\.decompress"
+        type: "regex"
+    mitre_attack: "T1027"
+    false_positive_note: "zlib alone is fine for data compression"
+
+  - id: "OBF-HEX-001"
+    name: "Hex-Encoded Payload Execution"
+    category: "obfuscation"
+    subcategory: "hex_encoding"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "Decodes hex-encoded data and executes it"
+    user_message: "🔴 HEX-ENCODED PAYLOAD! This script hides code in hex format and executes it!"
+    match_patterns:
+      - pattern: "bytes\\.fromhex.*exec"
+        type: "regex"
+      - pattern: "exec.*bytes\\.fromhex"
+        type: "regex"
+      - pattern: "\\\\x[0-9a-fA-F]{2}.*exec"
+        type: "regex"
+    mitre_attack: "T1027"
+    false_positive_note: "Hex encoding is common for binary data"
+
+  - id: "OBF-CHR-001"
+    name: "chr()/ord() String Building Obfuscation"
+    category: "obfuscation"
+    subcategory: "char_obfuscation"
+    severity: "high"
+    weight: 65
+    languages: ["python"]
+    description: "Builds strings character by character to hide content from static analysis"
+    user_message: "🟠 OBFUSCATION DETECTED! This script builds strings from character codes to hide its true purpose!"
+    match_patterns:
+      - pattern: "chr\\s*\\(\\s*\\d+\\s*\\)\\s*\\+\\s*chr\\s*\\("
+        type: "regex"
+    mitre_attack: "T1027"
+    false_positive_note: "Sometimes used legitimately for internationalization"
+
+  - id: "OBF-LAYER-001"
+    name: "Multi-Layer Obfuscation Chain"
+    category: "obfuscation"
+    subcategory: "layered"
+    severity: "critical"
+    weight: 95
+    languages: ["python"]
+    description: "Multiple obfuscation layers combined — most sophisticated technique"
+    user_message: "🔴 ADVANCED OBFUSCATION! Multiple layers of hiding detected — this is what sophisticated malware does!"
+    match_patterns:
+      - pattern: "exec.*marshal.*zlib.*b64decode"
+        type: "regex"
+      - pattern: "exec\\s*\\(.*decompress.*b64decode"
+        type: "regex"
+    mitre_attack: "T1027.002"
+    false_positive_note: "No legitimate use"
+
+  - id: "OBF-ROT-001"
+    name: "ROT13 Encoding"
+    category: "obfuscation"
+    subcategory: "rot_encoding"
+    severity: "medium"
+    weight: 45
+    languages: ["python"]
+    description: "Uses ROT13 or codecs for string encoding obfuscation"
+    user_message: "🟡 This script uses ROT13 encoding to hide strings — a simple obfuscation technique"
+    match_patterns:
+      - pattern: "codecs\\.decode.*rot.13"
+        type: "regex"
+      - pattern: "rot_13"
+        type: "literal"
+    mitre_attack: "T1027"
+    false_positive_note: "ROT13 is used in some legitimate puzzles/games"
+
+  - id: "OBF-UNICODE-001"
+    name: "Unicode Escape Obfuscation"
+    category: "obfuscation"
+    subcategory: "unicode"
+    severity: "medium"
+    weight: 55
+    languages: ["python", "javascript"]
+    description: "Uses unicode escape sequences to hide malicious strings"
+    user_message: "🟡 OBFUSCATION! This script hides strings using unicode escapes — obscuring its real intent"
+    match_patterns:
+      - pattern: "\\\\u[0-9a-fA-F]{4}.*\\\\u[0-9a-fA-F]{4}.*\\\\u[0-9a-fA-F]{4}"
+        type: "regex"
+    mitre_attack: "T1027"
+    false_positive_note: "Unicode escapes are common in internationalized code"
+
+  - id: "OBF-PYARMOR-001"
+    name: "PyArmor Obfuscation Markers"
+    category: "obfuscation"
+    subcategory: "commercial_obfuscation"
+    severity: "medium"
+    weight: 45
+    languages: ["python"]
+    description: "Code has been obfuscated with PyArmor — prevents code inspection"
+    user_message: "🟡 This script is obfuscated with PyArmor — its code is intentionally hidden from inspection!"
+    match_patterns:
+      - pattern: "pytransform"
+        type: "literal"
+      - pattern: "__pyarmor__"
+        type: "literal"
+    mitre_attack: "T1027.002"
+    false_positive_note: "Commercial software may legitimately use PyArmor"

@@ -1,0 +1,239 @@
+patterns:
+  - id: "JS-EXEC-001"
+    name: "eval() Dynamic Execution"
+    category: "execution"
+    subcategory: "dynamic_code"
+    severity: "critical"
+    weight: 80
+    languages: ["javascript"]
+    description: "eval() executes arbitrary JavaScript code strings"
+    user_message: "🔴 This script uses eval() to run hidden/dynamic code — a classic attack technique!"
+    match_patterns:
+      - pattern: "eval\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.007"
+    false_positive_note: "Very occasionally used in legitimate parsers"
+
+  - id: "JS-EXEC-002"
+    name: "Function Constructor Code Execution"
+    category: "execution"
+    subcategory: "dynamic_code"
+    severity: "critical"
+    weight: 80
+    languages: ["javascript"]
+    description: "new Function() creates functions from strings — equivalent to eval()"
+    user_message: "🔴 This script creates functions from strings — used to hide and execute malicious code!"
+    match_patterns:
+      - pattern: "new\\s+Function\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.007"
+    false_positive_note: "Rarely legitimate"
+
+  - id: "JS-PROC-001"
+    name: "child_process.exec() Shell Command"
+    category: "execution"
+    subcategory: "shell_command"
+    severity: "critical"
+    weight: 85
+    languages: ["javascript"]
+    description: "Executes shell commands via Node.js child_process module"
+    user_message: "🔴 This Node.js script runs system shell commands — could control your computer!"
+    match_patterns:
+      - pattern: "child_process.*exec\\s*\\("
+        type: "regex"
+      - pattern: "require\\s*\\(['\"]child_process['\"]\\)"
+        type: "regex"
+    mitre_attack: "T1059"
+    false_positive_note: "Common in build tools and CLI scripts"
+
+  - id: "JS-PROC-002"
+    name: "child_process.execSync()"
+    category: "execution"
+    subcategory: "shell_command"
+    severity: "critical"
+    weight: 85
+    languages: ["javascript"]
+    description: "Synchronously executes shell commands"
+    user_message: "🔴 This script runs synchronous shell commands — can execute anything on your computer!"
+    match_patterns:
+      - pattern: "execSync\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059"
+    false_positive_note: "Common in build tools"
+
+  - id: "JS-COOKIE-001"
+    name: "document.cookie Access"
+    category: "credential_access"
+    subcategory: "cookie_theft"
+    severity: "high"
+    weight: 65
+    languages: ["javascript"]
+    description: "Reads browser cookies — can steal session tokens"
+    user_message: "🟠 This script reads browser cookies — could steal your session tokens and log you into sites!"
+    match_patterns:
+      - pattern: "document\\.cookie"
+        type: "literal"
+    mitre_attack: "T1539"
+    false_positive_note: "Cookies are commonly read for legitimate purposes"
+
+  - id: "JS-NET-001"
+    name: "fetch() Data Exfiltration"
+    category: "exfiltration"
+    subcategory: "http_exfil"
+    severity: "medium"
+    weight: 55
+    languages: ["javascript"]
+    description: "Sends data to external server via fetch API"
+    user_message: "🟡 This script sends data to an external server via fetch() — check what data is being sent"
+    match_patterns:
+      - pattern: "fetch\\s*\\([^)]*method\\s*:\\s*['\"]POST['\"]"
+        type: "regex"
+    mitre_attack: "T1041"
+    false_positive_note: "Very common in legitimate web applications"
+
+  - id: "JS-KEY-001"
+    name: "Browser Keylogger"
+    category: "collection"
+    subcategory: "keylogging"
+    severity: "critical"
+    weight: 85
+    languages: ["javascript"]
+    description: "Captures keystrokes via event listener and sends to remote"
+    user_message: "🔴 KEYLOGGER! This script captures your keystrokes in the browser — including passwords!"
+    match_patterns:
+      - pattern: "addEventListener\\s*\\(['\"]key(down|press|up)['\"]"
+        type: "regex"
+    mitre_attack: "T1056.001"
+    false_positive_note: "Keyboard event listeners are common in legitimate UIs"
+
+  - id: "JS-CLIP-001"
+    name: "Clipboard Access"
+    category: "collection"
+    subcategory: "clipboard"
+    severity: "high"
+    weight: 70
+    languages: ["javascript"]
+    description: "Reads clipboard contents — could steal copied passwords/crypto addresses"
+    user_message: "🟠 This script reads your clipboard — could steal copied passwords or crypto wallet addresses!"
+    match_patterns:
+      - pattern: "navigator\\.clipboard\\.readText"
+        type: "literal"
+      - pattern: "clipboard\\.readText"
+        type: "literal"
+    mitre_attack: "T1115"
+    false_positive_note: "Some paste-based UIs use clipboard legitimately"
+
+  - id: "JS-NPM-001"
+    name: "npm Lifecycle Hook Script"
+    category: "execution"
+    subcategory: "supply_chain"
+    severity: "high"
+    weight: 75
+    languages: ["javascript"]
+    description: "Abuses npm install hooks to run malicious code on package install"
+    user_message: "🟠 This package runs code automatically when installed via npm — a supply chain attack technique!"
+    match_patterns:
+      - pattern: "\"preinstall\"\\s*:"
+        type: "regex"
+      - pattern: "\"postinstall\"\\s*:"
+        type: "regex"
+      - pattern: "\"install\"\\s*:"
+        type: "regex"
+    mitre_attack: "T1059.007"
+    false_positive_note: "Some packages legitimately compile native modules on install"
+
+  - id: "JS-NPM-002"
+    name: "Base64 Decoded Eval (Encoded Payload)"
+    category: "obfuscation"
+    subcategory: "encoded_payload"
+    severity: "critical"
+    weight: 90
+    languages: ["javascript"]
+    description: "Decodes base64 string and executes — classic obfuscation"
+    user_message: "🔴 HIDDEN CODE! This script decodes and runs base64-encoded content — a common obfuscation trick!"
+    match_patterns:
+      - pattern: "Buffer\\.from\\s*\\([^)]+,\\s*['\"]base64['\"]\\)"
+        type: "regex"
+      - pattern: "atob\\s*\\(.*eval"
+        type: "regex"
+    mitre_attack: "T1027"
+    false_positive_note: "Some legitimate tools use base64 for binary data"
+
+  - id: "JS-ENV-001"
+    name: "process.env Access (Environment Variables)"
+    category: "credential_access"
+    subcategory: "env_secrets"
+    severity: "low"
+    weight: 40
+    languages: ["javascript"]
+    description: "Reads environment variables — may access API keys and secrets"
+    user_message: "🟡 This script reads environment variables — could access your API keys and secrets"
+    match_patterns:
+      - pattern: "process\\.env\\."
+        type: "regex"
+    mitre_attack: "T1552.001"
+    false_positive_note: "Very common in legitimate Node.js applications"
+
+  - id: "JS-FS-001"
+    name: "Sensitive File Read (Node.js)"
+    category: "credential_access"
+    subcategory: "file_access"
+    severity: "high"
+    weight: 70
+    languages: ["javascript"]
+    description: "Reads sensitive system files via Node.js fs module"
+    user_message: "🟠 This script reads sensitive system files — could steal credentials or private keys"
+    match_patterns:
+      - pattern: "fs\\.readFile.*(\\.ssh|/etc/passwd|credentials|id_rsa)"
+        type: "regex"
+      - pattern: "readFileSync.*(\\.ssh|/etc/shadow|AWS)"
+        type: "regex"
+    mitre_attack: "T1005"
+    false_positive_note: "fs.readFile is very common in Node.js"
+
+  - id: "JS-CAM-001"
+    name: "Camera Access via getUserMedia"
+    category: "collection"
+    subcategory: "camera"
+    severity: "critical"
+    weight: 80
+    languages: ["javascript"]
+    description: "Requests access to device camera"
+    user_message: "🔴 CAMERA ACCESS! This script requests access to your webcam — is that expected?"
+    match_patterns:
+      - pattern: "getUserMedia\\s*\\(.*video"
+        type: "regex"
+      - pattern: "getDisplayMedia"
+        type: "literal"
+    mitre_attack: "T1125"
+    false_positive_note: "Legitimate in video chat applications"
+
+  - id: "JS-MIC-001"
+    name: "Microphone Access via getUserMedia"
+    category: "collection"
+    subcategory: "microphone"
+    severity: "critical"
+    weight: 80
+    languages: ["javascript"]
+    description: "Requests access to device microphone"
+    user_message: "🔴 MICROPHONE ACCESS! This script requests your microphone — is that expected for this app?"
+    match_patterns:
+      - pattern: "getUserMedia\\s*\\(.*audio"
+        type: "regex"
+    mitre_attack: "T1123"
+    false_positive_note: "Legitimate in voice/video applications"
+
+  - id: "JS-WEBSOCKET-001"
+    name: "WebSocket C2 Connection"
+    category: "network"
+    subcategory: "c2_channel"
+    severity: "medium"
+    weight: 50
+    languages: ["javascript"]
+    description: "Opens WebSocket connection — can be used as C2 channel"
+    user_message: "🟡 This script opens a WebSocket connection — review where it's connecting to"
+    match_patterns:
+      - pattern: "new\\s+WebSocket\\s*\\("
+        type: "regex"
+    mitre_attack: "T1071"
+    false_positive_note: "WebSockets are widely used in legitimate apps"

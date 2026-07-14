@@ -1,0 +1,228 @@
+patterns:
+  - id: "PERM-CAM-001"
+    name: "Camera Access (OpenCV)"
+    category: "collection"
+    subcategory: "camera"
+    severity: "high"
+    weight: 75
+    languages: ["python"]
+    description: "Accesses device camera using OpenCV"
+    user_message: "📷 CAMERA ACCESS! This script accesses your webcam — is this expected for this type of script?"
+    match_patterns:
+      - pattern: "VideoCapture\\s*\\(\\s*0\\s*\\)"
+        type: "regex"
+      - pattern: "cv2\\.VideoCapture"
+        type: "literal"
+    mitre_attack: "T1125"
+    false_positive_note: "Legitimate in computer vision applications"
+
+  - id: "PERM-CAM-002"
+    name: "Camera Access (JavaScript)"
+    category: "collection"
+    subcategory: "camera"
+    severity: "high"
+    weight: 75
+    languages: ["javascript"]
+    description: "Browser API request for camera access"
+    user_message: "📷 CAMERA ACCESS! This web script requests access to your camera — verify this is intended!"
+    match_patterns:
+      - pattern: "getUserMedia\\s*\\(.*video\\s*:\\s*true"
+        type: "regex"
+    mitre_attack: "T1125"
+    false_positive_note: "Legitimate in video call applications"
+
+  - id: "PERM-MIC-001"
+    name: "Microphone Access (pyaudio/sounddevice)"
+    category: "collection"
+    subcategory: "microphone"
+    severity: "high"
+    weight: 75
+    languages: ["python"]
+    description: "Records audio via microphone"
+    user_message: "🎤 MICROPHONE ACCESS! This script accesses your microphone — is this expected for this script?"
+    match_patterns:
+      - pattern: "import\\s+pyaudio"
+        type: "regex"
+      - pattern: "import\\s+sounddevice"
+        type: "regex"
+      - pattern: "PyAudio\\s*\\("
+        type: "regex"
+      - pattern: "sounddevice\\.rec\\s*\\("
+        type: "regex"
+    mitre_attack: "T1123"
+    false_positive_note: "Legitimate in audio processing applications"
+
+  - id: "PERM-MIC-002"
+    name: "Microphone Access (JavaScript)"
+    category: "collection"
+    subcategory: "microphone"
+    severity: "high"
+    weight: 75
+    languages: ["javascript"]
+    description: "Browser API request for microphone access"
+    user_message: "🎤 MICROPHONE ACCESS! This web script requests your microphone — is this really needed?"
+    match_patterns:
+      - pattern: "getUserMedia\\s*\\(.*audio\\s*:\\s*true"
+        type: "regex"
+    mitre_attack: "T1123"
+    false_positive_note: "Legitimate in voice call applications"
+
+  - id: "PERM-SCR-001"
+    name: "Screen Capture (Python mss/PIL)"
+    category: "collection"
+    subcategory: "screen_capture"
+    severity: "high"
+    weight: 70
+    languages: ["python"]
+    description: "Captures screenshots of the user's screen"
+    user_message: "🖥️ SCREEN CAPTURE! This script takes screenshots of your screen — is that expected?"
+    match_patterns:
+      - pattern: "import\\s+mss"
+        type: "regex"
+      - pattern: "ImageGrab\\.grab"
+        type: "literal"
+      - pattern: "pyautogui\\.screenshot"
+        type: "literal"
+      - pattern: "PIL\\.ImageGrab"
+        type: "literal"
+    mitre_attack: "T1113"
+    false_positive_note: "Legitimate in automation and testing tools"
+
+  - id: "PERM-KEY-001"
+    name: "Keylogger - pynput"
+    category: "collection"
+    subcategory: "keylogging"
+    severity: "critical"
+    weight: 90
+    languages: ["python"]
+    description: "Records keystrokes using pynput library"
+    user_message: "⌨️ KEYLOGGER DETECTED! This script records every key you type — including passwords and messages!"
+    match_patterns:
+      - pattern: "pynput\\.keyboard.*Listener"
+        type: "regex"
+      - pattern: "from\\s+pynput\\.keyboard\\s+import\\s+Listener"
+        type: "regex"
+    mitre_attack: "T1056.001"
+    false_positive_note: "No legitimate use in user-downloaded scripts"
+
+  - id: "PERM-KEY-002"
+    name: "Keylogger - Win32 Hook"
+    category: "collection"
+    subcategory: "keylogging"
+    severity: "critical"
+    weight: 95
+    languages: ["python", "powershell"]
+    description: "Uses Windows API to hook keyboard at the OS level"
+    user_message: "⌨️ SYSTEM-LEVEL KEYLOGGER! Uses Windows API to record all keystrokes system-wide — extremely dangerous!"
+    match_patterns:
+      - pattern: "SetWindowsHookEx"
+        type: "literal"
+      - pattern: "WH_KEYBOARD_LL"
+        type: "literal"
+      - pattern: "GetAsyncKeyState"
+        type: "literal"
+    mitre_attack: "T1056.001"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PERM-CLIP-001"
+    name: "Clipboard Access"
+    category: "collection"
+    subcategory: "clipboard"
+    severity: "medium"
+    weight: 55
+    languages: ["python", "javascript", "powershell"]
+    description: "Reads clipboard contents — could steal copied crypto addresses, passwords"
+    user_message: "📋 CLIPBOARD ACCESS! This script reads your clipboard — could steal copied passwords or crypto addresses!"
+    match_patterns:
+      - pattern: "pyperclip\\.paste"
+        type: "literal"
+      - pattern: "win32clipboard"
+        type: "literal"
+      - pattern: "GetClipboardData"
+        type: "literal"
+      - pattern: "xclip\\s+-o"
+        type: "regex"
+      - pattern: "pbpaste"
+        type: "literal"
+    mitre_attack: "T1115"
+    false_positive_note: "Clipboard reading is occasionally legitimate in productivity tools"
+
+  - id: "PERM-LOC-001"
+    name: "Location/GPS Access"
+    category: "collection"
+    subcategory: "location"
+    severity: "medium"
+    weight: 50
+    languages: ["javascript"]
+    description: "Requests user's geographic location"
+    user_message: "📍 LOCATION ACCESS! This script requests your GPS location — is this needed for its purpose?"
+    match_patterns:
+      - pattern: "geolocation\\.getCurrentPosition"
+        type: "literal"
+      - pattern: "navigator\\.geolocation"
+        type: "literal"
+    mitre_attack: "T1430"
+    false_positive_note: "Legitimate in mapping applications"
+
+  - id: "PERM-BGSERV-001"
+    name: "Background Service/Daemon Creation"
+    category: "persistence"
+    subcategory: "background_service"
+    severity: "high"
+    weight: 65
+    languages: ["python", "shell"]
+    description: "Creates a background service or daemon process"
+    user_message: "👻 BACKGROUND SERVICE! This script installs itself to run silently in the background at all times!"
+    match_patterns:
+      - pattern: "import\\s+daemon"
+        type: "regex"
+      - pattern: "python-daemon"
+        type: "literal"
+      - pattern: "Daemonize"
+        type: "literal"
+      - pattern: "os\\.fork\\s*\\(\\s*\\)"
+        type: "regex"
+    mitre_attack: "T1543"
+    false_positive_note: "Legitimate server software runs as daemons"
+
+  - id: "PERM-BROWSER-001"
+    name: "Browser Data Access"
+    category: "credential_access"
+    subcategory: "browser_data"
+    severity: "critical"
+    weight: 85
+    languages: ["python", "shell"]
+    description: "Accesses browser stored credentials and session data"
+    user_message: "🌍 BROWSER DATA THEFT! This script accesses your browser's saved passwords and login sessions!"
+    match_patterns:
+      - pattern: "Login Data"
+        type: "literal"
+      - pattern: "Chrome.*Cookies"
+        type: "regex"
+      - pattern: "firefox.*places\\.sqlite"
+        type: "regex"
+      - pattern: "keychain"
+        type: "literal"
+    mitre_attack: "T1555.003"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PERM-ADMIN-001"
+    name: "Administrator/Root Privilege Request"
+    category: "privilege_escalation"
+    subcategory: "admin_request"
+    severity: "high"
+    weight: 65
+    languages: ["python", "shell", "powershell"]
+    description: "Requests or checks for administrator/root privileges"
+    user_message: "🔑 ADMIN PRIVILEGE! This script requests administrator/root access — why does it need this?"
+    match_patterns:
+      - pattern: "os\\.getuid\\s*\\(\\s*\\)\\s*==\\s*0"
+        type: "regex"
+      - pattern: "RunAs.*administrator"
+        type: "regex"
+      - pattern: "ShellExecuteW.*runas"
+        type: "regex"
+      - pattern: "IsUserAnAdmin"
+        type: "literal"
+    mitre_attack: "T1548"
+    false_positive_note: "Some tools need admin rights legitimately"

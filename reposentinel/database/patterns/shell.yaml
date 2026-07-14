@@ -1,0 +1,373 @@
+patterns:
+  - id: "SH-REV-001"
+    name: "Bash Reverse Shell via /dev/tcp"
+    category: "network"
+    subcategory: "reverse_shell"
+    severity: "critical"
+    weight: 95
+    languages: ["shell"]
+    description: "Classic bash reverse shell using /dev/tcp device"
+    user_message: "🔴 REVERSE SHELL! This script opens a backdoor — gives attackers full remote control of your computer!"
+    match_patterns:
+      - pattern: "/dev/tcp/"
+        type: "literal"
+      - pattern: "bash\\s+-i\\s+>&"
+        type: "regex"
+      - pattern: "0>&1"
+        type: "literal"
+    mitre_attack: "T1059.004"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "SH-REV-002"
+    name: "Netcat Reverse Shell"
+    category: "network"
+    subcategory: "reverse_shell"
+    severity: "critical"
+    weight: 95
+    languages: ["shell"]
+    description: "Uses netcat to create reverse shell connection"
+    user_message: "🔴 REVERSE SHELL! Netcat is being used to open a backdoor to your computer!"
+    match_patterns:
+      - pattern: "nc\\s+-e\\s+/bin/(ba)?sh"
+        type: "regex"
+      - pattern: "nc\\s+-c\\s+bash"
+        type: "regex"
+      - pattern: "ncat\\s+.*--exec"
+        type: "regex"
+    mitre_attack: "T1059.004"
+    false_positive_note: "No legitimate use"
+
+  - id: "SH-REV-003"
+    name: "Netcat mkfifo Reverse Shell"
+    category: "network"
+    subcategory: "reverse_shell"
+    severity: "critical"
+    weight: 95
+    languages: ["shell"]
+    description: "Uses named pipe with netcat for reverse shell"
+    user_message: "🔴 REVERSE SHELL! This script uses a named pipe trick to open a backdoor to your computer!"
+    match_patterns:
+      - pattern: "mkfifo.*nc"
+        type: "regex"
+      - pattern: "mkfifo\\s+/tmp"
+        type: "regex"
+    mitre_attack: "T1059.004"
+    false_positive_note: "No legitimate use"
+
+  - id: "SH-REV-004"
+    name: "socat Reverse Shell"
+    category: "network"
+    subcategory: "reverse_shell"
+    severity: "critical"
+    weight: 95
+    languages: ["shell"]
+    description: "Uses socat to create a reverse shell"
+    user_message: "🔴 REVERSE SHELL via socat detected! Attackers can take full control of your system!"
+    match_patterns:
+      - pattern: "socat.*exec.*bash"
+        type: "regex"
+      - pattern: "socat.*TCP.*EXEC"
+        type: "regex"
+    mitre_attack: "T1059.004"
+    false_positive_note: "No legitimate use"
+
+  - id: "SH-PRIV-001"
+    name: "World-Writable Permissions (chmod 777)"
+    category: "privilege_escalation"
+    subcategory: "file_permissions"
+    severity: "high"
+    weight: 60
+    languages: ["shell"]
+    description: "Sets dangerously permissive file permissions"
+    user_message: "🟠 This script sets files to world-writable (chmod 777) — weakens system security"
+    match_patterns:
+      - pattern: "chmod\\s+777"
+        type: "regex"
+      - pattern: "chmod\\s+-R\\s+777"
+        type: "regex"
+    mitre_attack: "T1222.002"
+    false_positive_note: "Sometimes used in quick-and-dirty scripts"
+
+  - id: "SH-PRIV-002"
+    name: "SUID Bit Setting (chmod +s)"
+    category: "privilege_escalation"
+    subcategory: "suid"
+    severity: "critical"
+    weight: 85
+    languages: ["shell"]
+    description: "Sets SUID bit allowing execution with elevated privileges"
+    user_message: "🔴 PRIVILEGE ESCALATION! This script sets SUID bit — allows programs to run as root!"
+    match_patterns:
+      - pattern: "chmod\\s+\\+s"
+        type: "regex"
+      - pattern: "chmod\\s+u\\+s"
+        type: "regex"
+      - pattern: "chmod\\s+4[0-9]{3}"
+        type: "regex"
+    mitre_attack: "T1548.001"
+    false_positive_note: "Very rarely legitimate in user scripts"
+
+  - id: "SH-PRIV-003"
+    name: "chown to root"
+    category: "privilege_escalation"
+    subcategory: "ownership"
+    severity: "high"
+    weight: 70
+    languages: ["shell"]
+    description: "Changes file ownership to root"
+    user_message: "🟠 This script changes file ownership to root — escalating system privileges"
+    match_patterns:
+      - pattern: "chown\\s+root"
+        type: "regex"
+      - pattern: "chown\\s+0:0"
+        type: "regex"
+    mitre_attack: "T1222.002"
+    false_positive_note: "Used in some system setup scripts"
+
+  - id: "SH-PRIV-004"
+    name: "Sudoers File Modification"
+    category: "privilege_escalation"
+    subcategory: "sudo"
+    severity: "critical"
+    weight: 90
+    languages: ["shell"]
+    description: "Modifies /etc/sudoers to grant unauthorized sudo access"
+    user_message: "🔴 PRIVILEGE ESCALATION! This script modifies sudoers — gaining permanent admin access!"
+    match_patterns:
+      - pattern: "/etc/sudoers"
+        type: "literal"
+      - pattern: "echo.*NOPASSWD.*>>.*/etc/sudoers"
+        type: "regex"
+    mitre_attack: "T1548.003"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "SH-DEST-001"
+    name: "Filesystem Wipe (rm -rf /)"
+    category: "impact"
+    subcategory: "data_destruction"
+    severity: "critical"
+    weight: 95
+    languages: ["shell"]
+    description: "Attempts to recursively delete entire filesystem"
+    user_message: "🔴 DESTRUCTIVE! This script tries to DELETE YOUR ENTIRE HARD DRIVE — DO NOT RUN!"
+    match_patterns:
+      - pattern: "rm\\s+-rf\\s+/"
+        type: "regex"
+      - pattern: "rm\\s+-rf\\s+\\$HOME"
+        type: "regex"
+      - pattern: "rm\\s+--no-preserve-root"
+        type: "regex"
+    mitre_attack: "T1485"
+    false_positive_note: "No legitimate use"
+
+  - id: "SH-DEST-002"
+    name: "Disk Overwrite via dd"
+    category: "impact"
+    subcategory: "disk_wipe"
+    severity: "critical"
+    weight: 95
+    languages: ["shell"]
+    description: "Overwrites disk with zeros/random data — permanent destruction"
+    user_message: "🔴 DISK WIPER! This script will PERMANENTLY DESTROY your hard drive data!"
+    match_patterns:
+      - pattern: "dd\\s+if=/dev/(zero|urandom|null)\\s+of=/dev/sd"
+        type: "regex"
+      - pattern: "dd\\s+if=/dev/zero\\s+of="
+        type: "regex"
+    mitre_attack: "T1561.001"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "SH-DEST-003"
+    name: "Disk Format (mkfs)"
+    category: "impact"
+    subcategory: "disk_wipe"
+    severity: "critical"
+    weight: 90
+    languages: ["shell"]
+    description: "Formats a disk partition — permanent data loss"
+    user_message: "🔴 DISK FORMATTER! This script will FORMAT your disk — permanent data loss!"
+    match_patterns:
+      - pattern: "mkfs\\.(ext[234]|xfs|btrfs|fat)\\s+/dev/"
+        type: "regex"
+    mitre_attack: "T1561.002"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "SH-DEST-004"
+    name: "Fork Bomb"
+    category: "impact"
+    subcategory: "denial_of_service"
+    severity: "critical"
+    weight: 85
+    languages: ["shell"]
+    description: "Fork bomb crashes system by exhausting process table"
+    user_message: "🔴 FORK BOMB! This script will crash your computer by creating infinite processes!"
+    match_patterns:
+      - pattern: ":\\(\\)\\s*\\{\\s*:|"
+        type: "regex"
+      - pattern: ":(){:|:&};:"
+        type: "literal"
+    mitre_attack: "T1499"
+    false_positive_note: "No legitimate use"
+
+  - id: "SH-PERS-001"
+    name: "Crontab Persistence"
+    category: "persistence"
+    subcategory: "cron"
+    severity: "high"
+    weight: 75
+    languages: ["shell"]
+    description: "Modifies crontab to run commands on schedule"
+    user_message: "🟠 This script modifies crontab — installs a scheduled task to run automatically!"
+    match_patterns:
+      - pattern: "crontab\\s+-e"
+        type: "regex"
+      - pattern: "crontab\\s+-l.*>>"
+        type: "regex"
+      - pattern: "echo.*>>\\s*/var/spool/cron"
+        type: "regex"
+      - pattern: "echo.*>>.*crontab"
+        type: "regex"
+    mitre_attack: "T1053.003"
+    false_positive_note: "Some setup scripts legitimately add cron jobs"
+
+  - id: "SH-PERS-002"
+    name: "Shell Profile Modification"
+    category: "persistence"
+    subcategory: "shell_profile"
+    severity: "high"
+    weight: 70
+    languages: ["shell"]
+    description: "Modifies shell profile for persistence on every login"
+    user_message: "🟠 This script modifies your shell profile — runs code every time you open a terminal!"
+    match_patterns:
+      - pattern: ">>\\s*~?/?\\.bashrc"
+        type: "regex"
+      - pattern: ">>\\s*~?/?\\.bash_profile"
+        type: "regex"
+      - pattern: ">>\\s*~?/?\\.zshrc"
+        type: "regex"
+      - pattern: ">>\\s*/etc/profile"
+        type: "regex"
+    mitre_attack: "T1546.004"
+    false_positive_note: "Some tools legitimately add to PATH in .bashrc"
+
+  - id: "SH-PERS-003"
+    name: "rc.local Boot Persistence"
+    category: "persistence"
+    subcategory: "boot_script"
+    severity: "critical"
+    weight: 80
+    languages: ["shell"]
+    description: "Adds commands to rc.local for execution at boot"
+    user_message: "🔴 PERSISTENCE! This script modifies rc.local — runs every time your computer starts!"
+    match_patterns:
+      - pattern: ">>\\s*/etc/rc\\.local"
+        type: "regex"
+      - pattern: "/etc/rc\\.d/"
+        type: "literal"
+    mitre_attack: "T1037.004"
+    false_positive_note: "Some system setup scripts use rc.local"
+
+  - id: "SH-PERS-004"
+    name: "Systemd Service Installation"
+    category: "persistence"
+    subcategory: "systemd"
+    severity: "critical"
+    weight: 80
+    languages: ["shell"]
+    description: "Creates a systemd service for persistent background execution"
+    user_message: "🔴 PERSISTENCE! This script installs a background service — runs permanently even after reboot!"
+    match_patterns:
+      - pattern: "systemctl\\s+enable"
+        type: "regex"
+      - pattern: "/etc/systemd/system/.*\\.service"
+        type: "regex"
+    mitre_attack: "T1543.002"
+    false_positive_note: "Legitimate software may install services"
+
+  - id: "SH-PERS-005"
+    name: "SSH authorized_keys Injection"
+    category: "persistence"
+    subcategory: "ssh_backdoor"
+    severity: "critical"
+    weight: 85
+    languages: ["shell"]
+    description: "Adds SSH key for unauthorized persistent access"
+    user_message: "🔴 SSH BACKDOOR! This script adds an SSH key — lets attackers log into your system anytime!"
+    match_patterns:
+      - pattern: ">>.*authorized_keys"
+        type: "regex"
+      - pattern: "\\.ssh/authorized_keys"
+        type: "literal"
+    mitre_attack: "T1098.004"
+    false_positive_note: "Some deployment scripts add keys legitimately"
+
+  - id: "SH-EXFIL-001"
+    name: "curl Data Exfiltration (POST)"
+    category: "exfiltration"
+    subcategory: "http_exfil"
+    severity: "critical"
+    weight: 80
+    languages: ["shell"]
+    description: "Uploads files or data to external server via curl"
+    user_message: "🔴 DATA THEFT! This script uploads your files to an external server using curl!"
+    match_patterns:
+      - pattern: "curl\\s+.*-X\\s+POST.*-d\\s+@"
+        type: "regex"
+      - pattern: "curl\\s+.*--data-binary\\s+@"
+        type: "regex"
+      - pattern: "curl\\s+.*-F.*@"
+        type: "regex"
+    mitre_attack: "T1048.003"
+    false_positive_note: "Some scripts legitimately POST data"
+
+  - id: "SH-EXEC-001"
+    name: "curl Pipe to Bash (Remote Execution)"
+    category: "execution"
+    subcategory: "remote_execution"
+    severity: "critical"
+    weight: 90
+    languages: ["shell"]
+    description: "Downloads and immediately executes code from the internet"
+    user_message: "🔴 REMOTE CODE EXECUTION! Downloads and runs unknown code from the internet — very dangerous!"
+    match_patterns:
+      - pattern: "curl.*\\|\\s*(ba)?sh"
+        type: "regex"
+      - pattern: "curl.*\\|\\s*bash"
+        type: "regex"
+    mitre_attack: "T1105"
+    false_positive_note: "Some install scripts use this pattern — still risky"
+
+  - id: "SH-EXEC-002"
+    name: "wget Pipe to Bash (Remote Execution)"
+    category: "execution"
+    subcategory: "remote_execution"
+    severity: "critical"
+    weight: 90
+    languages: ["shell"]
+    description: "Downloads and immediately executes code from the internet via wget"
+    user_message: "🔴 REMOTE CODE EXECUTION! Downloads and runs unknown code using wget — extremely dangerous!"
+    match_patterns:
+      - pattern: "wget.*\\|\\s*(ba)?sh"
+        type: "regex"
+      - pattern: "wget.*-O-.*\\|"
+        type: "regex"
+    mitre_attack: "T1105"
+    false_positive_note: "Some install scripts use this — always risky"
+
+  - id: "SH-SHADOW-001"
+    name: "Reading /etc/shadow"
+    category: "credential_access"
+    subcategory: "password_file"
+    severity: "critical"
+    weight: 90
+    languages: ["shell"]
+    description: "Dumps Linux password hashes"
+    user_message: "🔴 PASSWORD THEFT! This script reads /etc/shadow to steal system password hashes!"
+    match_patterns:
+      - pattern: "cat\\s+/etc/shadow"
+        type: "regex"
+      - pattern: "/etc/shadow"
+        type: "literal"
+    mitre_attack: "T1003.008"
+    false_positive_note: "No legitimate use in user scripts"

@@ -1,0 +1,449 @@
+patterns:
+  - id: "PY-EXEC-001"
+    name: "Dynamic eval() Execution"
+    category: "execution"
+    subcategory: "dynamic_code"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "eval() executes arbitrary Python code from a string"
+    user_message: "🔴 This script executes hidden/dynamic code using eval() — could run anything on your computer!"
+    match_patterns:
+      - pattern: "eval\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "Rarely legitimate; most eval uses are avoidable"
+
+  - id: "PY-EXEC-002"
+    name: "Dynamic exec() Execution"
+    category: "execution"
+    subcategory: "dynamic_code"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "exec() executes arbitrary Python code strings or objects"
+    user_message: "🔴 This script runs dynamically generated code using exec() — a common backdoor technique!"
+    match_patterns:
+      - pattern: "exec\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "Occasionally used in legitimate REPL tools"
+
+  - id: "PY-EXEC-003"
+    name: "Dynamic compile() Usage"
+    category: "execution"
+    subcategory: "dynamic_code"
+    severity: "high"
+    weight: 60
+    languages: ["python"]
+    description: "compile() converts strings to code objects for later execution"
+    user_message: "🟠 This script compiles code dynamically — often used to hide malicious logic"
+    match_patterns:
+      - pattern: "compile\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "Used in some interpreter tools"
+
+  - id: "PY-EXEC-004"
+    name: "Dynamic __import__ Call"
+    category: "execution"
+    subcategory: "dynamic_import"
+    severity: "high"
+    weight: 70
+    languages: ["python"]
+    description: "Dynamic module import to bypass static analysis"
+    user_message: "🟠 This script imports modules dynamically to avoid detection — suspicious behavior"
+    match_patterns:
+      - pattern: "__import__\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "Some frameworks use __import__ for plugin loading"
+
+  - id: "PY-EXEC-005"
+    name: "os.system() Shell Command"
+    category: "execution"
+    subcategory: "shell_command"
+    severity: "high"
+    weight: 75
+    languages: ["python"]
+    description: "Executes arbitrary shell commands via the OS"
+    user_message: "🟠 This script runs system shell commands directly — could do anything on your computer"
+    match_patterns:
+      - pattern: "os\\.system\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059"
+    false_positive_note: "Used in legitimate automation scripts"
+
+  - id: "PY-EXEC-006"
+    name: "os.popen() Shell Command"
+    category: "execution"
+    subcategory: "shell_command"
+    severity: "high"
+    weight: 75
+    languages: ["python"]
+    description: "Opens a pipe to a shell command for execution"
+    user_message: "🟠 This script opens a shell pipe — used to execute commands and capture output"
+    match_patterns:
+      - pattern: "os\\.popen\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059"
+    false_positive_note: "Common in system administration scripts"
+
+  - id: "PY-EXEC-007"
+    name: "subprocess.Popen with shell=True"
+    category: "execution"
+    subcategory: "shell_command"
+    severity: "high"
+    weight: 70
+    languages: ["python"]
+    description: "Spawns a subprocess with full shell interpretation enabled"
+    user_message: "🟠 This script spawns shell processes — can execute any system command"
+    match_patterns:
+      - pattern: "Popen\\s*\\([^)]*shell\\s*=\\s*True"
+        type: "regex"
+    mitre_attack: "T1059"
+    false_positive_note: "Legitimate in build tools and system scripts"
+
+  - id: "PY-EXEC-008"
+    name: "subprocess.call with shell=True"
+    category: "execution"
+    subcategory: "shell_command"
+    severity: "high"
+    weight: 70
+    languages: ["python"]
+    description: "Runs a shell command via subprocess.call"
+    user_message: "🟠 This script calls shell commands — review what commands are being run"
+    match_patterns:
+      - pattern: "subprocess\\.call\\s*\\([^)]*shell\\s*=\\s*True"
+        type: "regex"
+    mitre_attack: "T1059"
+    false_positive_note: "Common in system automation"
+
+  - id: "PY-IMP-001"
+    name: "ctypes Import (Memory Access)"
+    category: "execution"
+    subcategory: "low_level_access"
+    severity: "medium"
+    weight: 50
+    languages: ["python"]
+    description: "ctypes allows direct memory manipulation and calling native OS functions"
+    user_message: "🟡 This script imports ctypes — allows low-level memory access and calling system APIs"
+    match_patterns:
+      - pattern: "import\\s+ctypes"
+        type: "regex"
+      - pattern: "from\\s+ctypes"
+        type: "regex"
+    mitre_attack: "T1055"
+    false_positive_note: "Used in legitimate Windows automation tools"
+
+  - id: "PY-IMP-002"
+    name: "winreg Import (Registry Access)"
+    category: "persistence"
+    subcategory: "registry"
+    severity: "high"
+    weight: 65
+    languages: ["python"]
+    description: "Imports Windows registry manipulation module"
+    user_message: "🟠 This script accesses the Windows Registry — can add itself to startup or modify system settings"
+    match_patterns:
+      - pattern: "import\\s+winreg"
+        type: "regex"
+      - pattern: "import\\s+_winreg"
+        type: "regex"
+    mitre_attack: "T1547.001"
+    false_positive_note: "Legitimate in Windows system management tools"
+
+  - id: "PY-IMP-003"
+    name: "pickle Import (Deserialization Risk)"
+    category: "execution"
+    subcategory: "deserialization"
+    severity: "medium"
+    weight: 55
+    languages: ["python"]
+    description: "pickle can execute arbitrary code when deserializing untrusted data"
+    user_message: "🟡 This script uses pickle — deserializing untrusted data with pickle can execute malicious code"
+    match_patterns:
+      - pattern: "import\\s+pickle"
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "Common in machine learning and data science"
+
+  - id: "PY-IMP-004"
+    name: "marshal Import (Code Object Obfuscation)"
+    category: "obfuscation"
+    subcategory: "code_object"
+    severity: "high"
+    weight: 60
+    languages: ["python"]
+    description: "marshal serializes/deserializes Python code objects — used for obfuscation"
+    user_message: "🟠 This script uses marshal — often used to hide malicious code inside binary blobs"
+    match_patterns:
+      - pattern: "import\\s+marshal"
+        type: "regex"
+    mitre_attack: "T1027.002"
+    false_positive_note: "Rarely needed in legitimate code"
+
+  - id: "PY-FILE-001"
+    name: "Reading /etc/shadow (Password Hashes)"
+    category: "credential_access"
+    subcategory: "password_file"
+    severity: "critical"
+    weight: 90
+    languages: ["python"]
+    description: "Attempts to read Linux password hash file"
+    user_message: "🔴 This script tries to read /etc/shadow — it wants to steal your system password hashes!"
+    match_patterns:
+      - pattern: "/etc/shadow"
+        type: "literal"
+    mitre_attack: "T1003.008"
+    false_positive_note: "No legitimate use case in user scripts"
+
+  - id: "PY-FILE-002"
+    name: "Reading /etc/passwd (User Enumeration)"
+    category: "discovery"
+    subcategory: "user_enum"
+    severity: "medium"
+    weight: 40
+    languages: ["python"]
+    description: "Reads system user account information"
+    user_message: "🟡 This script reads /etc/passwd — enumerating system user accounts"
+    match_patterns:
+      - pattern: "/etc/passwd"
+        type: "literal"
+    mitre_attack: "T1087"
+    false_positive_note: "Some system tools read this legitimately"
+
+  - id: "PY-FILE-003"
+    name: "Reading SSH Private Keys"
+    category: "credential_access"
+    subcategory: "ssh_keys"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "Attempts to read SSH private key files"
+    user_message: "🔴 This script tries to steal your SSH private keys — could give attackers access to your servers!"
+    match_patterns:
+      - pattern: "\\.ssh/id_rsa"
+        type: "literal"
+      - pattern: "\\.ssh/id_ed25519"
+        type: "literal"
+      - pattern: "\\.ssh/id_ecdsa"
+        type: "literal"
+      - pattern: "\\.ssh/id_dsa"
+        type: "literal"
+    mitre_attack: "T1552.004"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PY-FILE-004"
+    name: "Browser Cookie/Password Database Access"
+    category: "credential_access"
+    subcategory: "browser_data"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "Accesses browser credential and cookie storage"
+    user_message: "🔴 This script accesses your browser's stored passwords and cookies — credential theft!"
+    match_patterns:
+      - pattern: "Google/Chrome/User Data"
+        type: "literal"
+      - pattern: "Chrome/User Data/Default/Login Data"
+        type: "literal"
+      - pattern: "Mozilla/Firefox/Profiles"
+        type: "literal"
+      - pattern: "AppData.*Chrome.*Cookies"
+        type: "regex"
+      - pattern: "Local Storage/leveldb"
+        type: "literal"
+    mitre_attack: "T1555.003"
+    false_positive_note: "No legitimate use in user-downloaded scripts"
+
+  - id: "PY-FILE-005"
+    name: "Reading .env File (Secret Exposure)"
+    category: "credential_access"
+    subcategory: "env_secrets"
+    severity: "medium"
+    weight: 60
+    languages: ["python"]
+    description: "Reads .env files which often contain API keys and passwords"
+    user_message: "🟡 This script reads .env files — could steal API keys, passwords, and secrets stored there"
+    match_patterns:
+      - pattern: "open\\s*\\(['\"]?\\.env['\"]?"
+        type: "regex"
+      - pattern: "load_dotenv"
+        type: "literal"
+    mitre_attack: "T1552.001"
+    false_positive_note: "Legitimate apps load .env for config"
+
+  - id: "PY-FILE-006"
+    name: "Reading AWS Credentials"
+    category: "credential_access"
+    subcategory: "cloud_credentials"
+    severity: "critical"
+    weight: 90
+    languages: ["python"]
+    description: "Accesses AWS credential files"
+    user_message: "🔴 This script steals your AWS cloud credentials — could access/delete your cloud resources!"
+    match_patterns:
+      - pattern: "\\.aws/credentials"
+        type: "literal"
+      - pattern: "AWS_ACCESS_KEY_ID"
+        type: "literal"
+      - pattern: "AWS_SECRET_ACCESS_KEY"
+        type: "literal"
+    mitre_attack: "T1552.001"
+    false_positive_note: "Legitimate AWS SDKs use these env vars"
+
+  - id: "PY-FILE-007"
+    name: "Discord Token Theft"
+    category: "credential_access"
+    subcategory: "token_theft"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "Reads Discord application data to steal user tokens"
+    user_message: "🔴 This script steals your Discord token — could hijack your Discord account completely!"
+    match_patterns:
+      - pattern: "discord.*Local Storage"
+        type: "regex"
+      - pattern: "discordapp.*leveldb"
+        type: "regex"
+      - pattern: "discord/Local Storage"
+        type: "literal"
+    mitre_attack: "T1528"
+    false_positive_note: "No legitimate use"
+
+  - id: "PY-DESER-001"
+    name: "pickle.loads() Deserialization"
+    category: "execution"
+    subcategory: "deserialization"
+    severity: "high"
+    weight: 70
+    languages: ["python"]
+    description: "Deserializes data using pickle — can execute arbitrary code"
+    user_message: "🟠 This script deserializes data with pickle — can execute malicious code hidden in data files"
+    match_patterns:
+      - pattern: "pickle\\.loads\\s*\\("
+        type: "regex"
+      - pattern: "pickle\\.load\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "Common in ML model loading"
+
+  - id: "PY-DUP-001"
+    name: "os.dup2() Stream Redirection (Reverse Shell)"
+    category: "network"
+    subcategory: "reverse_shell"
+    severity: "critical"
+    weight: 95
+    languages: ["python"]
+    description: "Redirects stdin/stdout/stderr to a socket — classic reverse shell technique"
+    user_message: "🔴 REVERSE SHELL DETECTED! This script opens a backdoor that lets attackers control your computer remotely!"
+    match_patterns:
+      - pattern: "os\\.dup2\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PY-SOCK-001"
+    name: "Outbound Socket Connection"
+    category: "network"
+    subcategory: "outbound_connection"
+    severity: "medium"
+    weight: 50
+    languages: ["python"]
+    description: "Creates an outbound network connection"
+    user_message: "🟡 This script creates network connections — check where it's connecting to"
+    match_patterns:
+      - pattern: "socket\\.connect\\s*\\("
+        type: "regex"
+    mitre_attack: "T1071"
+    false_positive_note: "Very common in networking scripts and web clients"
+
+  - id: "PY-SOCK-002"
+    name: "Bind Shell (Listening Socket)"
+    category: "network"
+    subcategory: "bind_shell"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "Opens a listening socket — classic bind shell backdoor"
+    user_message: "🔴 This script opens a network listener — could create a backdoor into your system!"
+    match_patterns:
+      - pattern: "socket\\.bind\\s*\\(.*socket\\.listen"
+        type: "regex"
+      - pattern: "\\.bind\\s*\\(.*\\.listen\\s*\\("
+        type: "regex"
+    mitre_attack: "T1059.006"
+    false_positive_note: "Legitimate in server applications"
+
+  - id: "PY-WEBHOOK-001"
+    name: "Discord Webhook Data Exfiltration"
+    category: "exfiltration"
+    subcategory: "webhook"
+    severity: "critical"
+    weight: 90
+    languages: ["python"]
+    description: "Sends data to a Discord webhook — used to exfiltrate stolen data"
+    user_message: "🔴 This script sends data to a Discord webhook — your data may be stolen and sent to an attacker!"
+    match_patterns:
+      - pattern: "discord\\.com/api/webhooks"
+        type: "literal"
+      - pattern: "discordapp\\.com/api/webhooks"
+        type: "literal"
+    mitre_attack: "T1567"
+    false_positive_note: "Some bots legitimately post to Discord webhooks"
+
+  - id: "PY-WEBHOOK-002"
+    name: "Telegram Bot Data Exfiltration"
+    category: "exfiltration"
+    subcategory: "webhook"
+    severity: "critical"
+    weight: 90
+    languages: ["python"]
+    description: "Sends data via Telegram bot API — used as C2 channel"
+    user_message: "🔴 This script uses Telegram to send data — your stolen data may be sent to an attacker's Telegram bot!"
+    match_patterns:
+      - pattern: "api\\.telegram\\.org/bot"
+        type: "literal"
+      - pattern: "telegram\\.Bot\\s*\\("
+        type: "regex"
+    mitre_attack: "T1102"
+    false_positive_note: "Legitimate Telegram bots exist"
+
+  - id: "PY-KEY-001"
+    name: "Keylogger - pynput Keyboard Listener"
+    category: "collection"
+    subcategory: "keylogging"
+    severity: "critical"
+    weight: 95
+    languages: ["python"]
+    description: "Uses pynput to record all keystrokes typed by the user"
+    user_message: "🔴 KEYLOGGER DETECTED! This script records every key you press — including passwords!"
+    match_patterns:
+      - pattern: "from\\s+pynput"
+        type: "regex"
+      - pattern: "import\\s+pynput"
+        type: "regex"
+      - pattern: "pynput\\.keyboard"
+        type: "literal"
+    mitre_attack: "T1056.001"
+    false_positive_note: "No legitimate use in user-downloaded scripts"
+
+  - id: "PY-KEY-002"
+    name: "Keylogger - keyboard Module"
+    category: "collection"
+    subcategory: "keylogging"
+    severity: "critical"
+    weight: 90
+    languages: ["python"]
+    description: "Uses keyboard module to hook keystrokes"
+    user_message: "🔴 KEYLOGGER DETECTED! This script records your keystrokes using the keyboard module!"
+    match_patterns:
+      - pattern: "import\\s+keyboard"
+        type: "regex"
+      - pattern: "keyboard\\.on_press"
+        type: "literal"
+      - pattern: "keyboard\\.hook"
+        type: "literal"
+    mitre_attack: "T1056.001"
+    false_positive_note: "keyboard module has some legitimate automation uses"

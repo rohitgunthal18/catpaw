@@ -1,0 +1,286 @@
+patterns:
+  - id: "PS-ENC-001"
+    name: "PowerShell Encoded Command"
+    category: "obfuscation"
+    subcategory: "encoded_command"
+    severity: "critical"
+    weight: 85
+    languages: ["powershell"]
+    description: "Executes base64-encoded PowerShell commands to bypass detection"
+    user_message: "🔴 HIDDEN CODE! This script runs base64-encoded PowerShell — hiding what it really does!"
+    match_patterns:
+      - pattern: "-EncodedCommand"
+        type: "literal"
+      - pattern: "-enc\\b"
+        type: "regex"
+      - pattern: "-e\\s+[A-Za-z0-9+/=]{20,}"
+        type: "regex"
+    mitre_attack: "T1027"
+    false_positive_note: "Sometimes used in legitimate remote management"
+
+  - id: "PS-ENC-002"
+    name: "ExecutionPolicy Bypass"
+    category: "defense_evasion"
+    subcategory: "policy_bypass"
+    severity: "high"
+    weight: 70
+    languages: ["powershell"]
+    description: "Bypasses PowerShell execution policy restrictions"
+    user_message: "🟠 This script bypasses PowerShell's security policy — disabling a key protection!"
+    match_patterns:
+      - pattern: "-ExecutionPolicy\\s+Bypass"
+        type: "regex"
+      - pattern: "-ExecutionPolicy\\s+Unrestricted"
+        type: "regex"
+      - pattern: "Set-ExecutionPolicy\\s+Bypass"
+        type: "regex"
+    mitre_attack: "T1059.001"
+    false_positive_note: "Sometimes needed in legitimate admin scripts"
+
+  - id: "PS-ENC-003"
+    name: "Hidden Window Execution"
+    category: "defense_evasion"
+    subcategory: "hidden_execution"
+    severity: "high"
+    weight: 75
+    languages: ["powershell"]
+    description: "Runs PowerShell hidden from the user"
+    user_message: "🟠 This script runs in a hidden window — concealing its activities from you!"
+    match_patterns:
+      - pattern: "-WindowStyle\\s+Hidden"
+        type: "regex"
+      - pattern: "-W\\s+Hidden"
+        type: "regex"
+    mitre_attack: "T1564"
+    false_positive_note: "Sometimes used for background services"
+
+  - id: "PS-IEX-001"
+    name: "Invoke-Expression (Dynamic Execution)"
+    category: "execution"
+    subcategory: "dynamic_code"
+    severity: "critical"
+    weight: 85
+    languages: ["powershell"]
+    description: "Invoke-Expression executes arbitrary PowerShell code strings"
+    user_message: "🔴 This script uses Invoke-Expression to run dynamic code — a very common attack technique!"
+    match_patterns:
+      - pattern: "Invoke-Expression"
+        type: "literal"
+      - pattern: "\\bIEX\\b"
+        type: "regex"
+    mitre_attack: "T1059.001"
+    false_positive_note: "Occasionally used in legitimate scripts"
+
+  - id: "PS-IEX-002"
+    name: "Obfuscated IEX (Backtick)"
+    category: "obfuscation"
+    subcategory: "obfuscated_iex"
+    severity: "critical"
+    weight: 90
+    languages: ["powershell"]
+    description: "Invoke-Expression obfuscated with backticks to evade detection"
+    user_message: "🔴 OBFUSCATED CODE! This script hides its dynamic execution using backtick tricks — evasion technique!"
+    match_patterns:
+      - pattern: "I`E`X"
+        type: "literal"
+      - pattern: "`i`e`x"
+        type: "literal"
+    mitre_attack: "T1027"
+    false_positive_note: "No legitimate use"
+
+  - id: "PS-DL-001"
+    name: "WebClient DownloadString"
+    category: "execution"
+    subcategory: "remote_execution"
+    severity: "critical"
+    weight: 85
+    languages: ["powershell"]
+    description: "Downloads a string (script) from a URL for execution"
+    user_message: "🔴 This script downloads code from the internet and runs it — remote code execution!"
+    match_patterns:
+      - pattern: "Net\\.WebClient.*DownloadString"
+        type: "regex"
+      - pattern: "WebClient\\(\\)\\.DownloadString"
+        type: "regex"
+    mitre_attack: "T1105"
+    false_positive_note: "Some download tools use this"
+
+  - id: "PS-DL-002"
+    name: "WebClient DownloadFile"
+    category: "execution"
+    subcategory: "file_download"
+    severity: "high"
+    weight: 75
+    languages: ["powershell"]
+    description: "Downloads a file from an external URL"
+    user_message: "🟠 This script downloads files from the internet — check what's being downloaded"
+    match_patterns:
+      - pattern: "DownloadFile\\s*\\("
+        type: "regex"
+      - pattern: "Invoke-WebRequest.*OutFile"
+        type: "regex"
+    mitre_attack: "T1105"
+    false_positive_note: "Common in legitimate update scripts"
+
+  - id: "PS-DL-003"
+    name: "Download and Execute (IEX + WebClient)"
+    category: "execution"
+    subcategory: "remote_execution"
+    severity: "critical"
+    weight: 95
+    languages: ["powershell"]
+    description: "Classic download-and-execute cradle — downloads and immediately runs code"
+    user_message: "🔴 REMOTE CODE EXECUTION! Downloads code from the internet and executes it immediately!"
+    match_patterns:
+      - pattern: "IEX.*DownloadString"
+        type: "regex"
+      - pattern: "Invoke-Expression.*WebClient"
+        type: "regex"
+      - pattern: "IEX\\s*\\(\\s*\\(New-Object"
+        type: "regex"
+    mitre_attack: "T1059.001"
+    false_positive_note: "No legitimate use"
+
+  - id: "PS-AMSI-001"
+    name: "AMSI Bypass Attempt"
+    category: "defense_evasion"
+    subcategory: "amsi_bypass"
+    severity: "critical"
+    weight: 95
+    languages: ["powershell"]
+    description: "Attempts to disable Windows Antimalware Scan Interface"
+    user_message: "🔴 ANTIVIRUS BYPASS! This script tries to disable Windows' malware scanning (AMSI)!"
+    match_patterns:
+      - pattern: "AmsiUtils"
+        type: "literal"
+      - pattern: "amsiInitFailed"
+        type: "literal"
+      - pattern: "AmsiScanBuffer"
+        type: "literal"
+    mitre_attack: "T1562.001"
+    false_positive_note: "No legitimate use"
+
+  - id: "PS-AMSI-002"
+    name: "Disable Windows Defender"
+    category: "defense_evasion"
+    subcategory: "av_disable"
+    severity: "critical"
+    weight: 95
+    languages: ["powershell"]
+    description: "Disables Windows Defender real-time protection"
+    user_message: "🔴 ANTIVIRUS DISABLED! This script turns off Windows Defender — leaving your PC unprotected!"
+    match_patterns:
+      - pattern: "Set-MpPreference\\s+-DisableRealtimeMonitoring\\s+\\$true"
+        type: "regex"
+      - pattern: "Set-MpPreference.*Disable.*true"
+        type: "regex"
+    mitre_attack: "T1562.001"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PS-AMSI-003"
+    name: "Defender Exclusion Addition"
+    category: "defense_evasion"
+    subcategory: "av_exclusion"
+    severity: "critical"
+    weight: 85
+    languages: ["powershell"]
+    description: "Adds paths to Defender exclusions to hide malware"
+    user_message: "🔴 SECURITY BYPASS! This script adds folders to Windows Defender exclusions to hide malware!"
+    match_patterns:
+      - pattern: "Add-MpPreference\\s+-ExclusionPath"
+        type: "regex"
+    mitre_attack: "T1562.001"
+    false_positive_note: "Occasionally needed for dev tool folders"
+
+  - id: "PS-REG-001"
+    name: "Registry Run Key Persistence"
+    category: "persistence"
+    subcategory: "registry_run"
+    severity: "critical"
+    weight: 90
+    languages: ["powershell"]
+    description: "Adds registry Run key for startup persistence"
+    user_message: "🔴 PERSISTENCE! This script adds itself to Windows startup via Registry Run key!"
+    match_patterns:
+      - pattern: "CurrentVersion\\\\Run"
+        type: "literal"
+      - pattern: "HKCU.*Run"
+        type: "regex"
+      - pattern: "HKLM.*Run"
+        type: "regex"
+    mitre_attack: "T1547.001"
+    false_positive_note: "Some installers legitimately add to Run key"
+
+  - id: "PS-TASK-001"
+    name: "Scheduled Task Creation"
+    category: "persistence"
+    subcategory: "scheduled_task"
+    severity: "critical"
+    weight: 80
+    languages: ["powershell"]
+    description: "Creates a scheduled task for persistence"
+    user_message: "🔴 PERSISTENCE! This script creates a scheduled task to run code automatically!"
+    match_patterns:
+      - pattern: "New-ScheduledTask"
+        type: "literal"
+      - pattern: "Register-ScheduledTask"
+        type: "literal"
+      - pattern: "schtasks\\s+/create"
+        type: "regex"
+    mitre_attack: "T1053.005"
+    false_positive_note: "Legitimate installers create scheduled tasks"
+
+  - id: "PS-CRED-001"
+    name: "Mimikatz Credential Dumping"
+    category: "credential_access"
+    subcategory: "credential_dumping"
+    severity: "critical"
+    weight: 95
+    languages: ["powershell"]
+    description: "Runs Mimikatz to dump Windows credentials from memory"
+    user_message: "🔴 CREDENTIAL THEFT! Mimikatz is used to steal ALL Windows passwords from memory!"
+    match_patterns:
+      - pattern: "Invoke-Mimikatz"
+        type: "literal"
+      - pattern: "mimikatz"
+        type: "literal"
+      - pattern: "sekurlsa::logonpasswords"
+        type: "literal"
+    mitre_attack: "T1003.001"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PS-WMI-001"
+    name: "WMI Event Subscription Persistence"
+    category: "persistence"
+    subcategory: "wmi"
+    severity: "critical"
+    weight: 85
+    languages: ["powershell"]
+    description: "Creates WMI event subscription for stealthy persistence"
+    user_message: "🔴 STEALTHY PERSISTENCE! WMI event subscription is a nearly invisible persistence method!"
+    match_patterns:
+      - pattern: "Set-WmiInstance"
+        type: "literal"
+      - pattern: "__EventFilter"
+        type: "literal"
+      - pattern: "CommandLineEventConsumer"
+        type: "literal"
+    mitre_attack: "T1546.003"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PS-SHADOW-001"
+    name: "Shadow Copy Deletion (Ransomware)"
+    category: "impact"
+    subcategory: "shadow_copies"
+    severity: "critical"
+    weight: 90
+    languages: ["powershell"]
+    description: "Deletes Volume Shadow Copies — prevents system restore after ransomware"
+    user_message: "🔴 RANSOMWARE INDICATOR! Deleting shadow copies is the #1 sign of ransomware — prevents recovery!"
+    match_patterns:
+      - pattern: "vssadmin\\s+delete\\s+shadows"
+        type: "regex"
+      - pattern: "Delete-WmiObject.*Win32_ShadowCopy"
+        type: "regex"
+    mitre_attack: "T1490"
+    false_positive_note: "No legitimate use in user scripts"

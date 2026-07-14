@@ -1,0 +1,138 @@
+patterns:
+  - id: "NET-REV-001"
+    name: "Generic Reverse Shell Pattern"
+    category: "network"
+    subcategory: "reverse_shell"
+    severity: "critical"
+    weight: 90
+    languages: ["all"]
+    description: "Common reverse shell indicators across languages"
+    user_message: "🔴 REVERSE SHELL! Code is trying to open a backdoor that lets attackers control your computer!"
+    match_patterns:
+      - pattern: "/bin/sh.*socket"
+        type: "regex"
+      - pattern: "/bin/bash.*connect"
+        type: "regex"
+    mitre_attack: "T1059"
+    false_positive_note: "No legitimate use"
+
+  - id: "NET-PORT-001"
+    name: "Known C2 Port Usage"
+    category: "network"
+    subcategory: "c2_port"
+    severity: "medium"
+    weight: 55
+    languages: ["all"]
+    description: "Uses ports commonly associated with malware C2 communication"
+    user_message: "🟡 This script connects to ports commonly used by malware (4444, 1337, 31337, etc.)"
+    match_patterns:
+      - pattern: "\\b(4444|5555|1337|31337|6666|6667|9001|4443)\\b"
+        type: "regex"
+    mitre_attack: "T1071"
+    false_positive_note: "These ports have some legitimate uses"
+
+  - id: "NET-STRAT-001"
+    name: "Cryptocurrency Mining Protocol"
+    category: "impact"
+    subcategory: "crypto_mining"
+    severity: "critical"
+    weight: 85
+    languages: ["all"]
+    description: "Uses Stratum mining protocol — cryptocurrency mining"
+    user_message: "🔴 CRYPTOMINER! This script uses your computer to mine cryptocurrency without your knowledge!"
+    match_patterns:
+      - pattern: "stratum\\+tcp://"
+        type: "literal"
+      - pattern: "stratum\\+ssl://"
+        type: "literal"
+    mitre_attack: "T1496"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "NET-DNS-001"
+    name: "DNS Tunneling Pattern"
+    category: "network"
+    subcategory: "dns_tunneling"
+    severity: "high"
+    weight: 75
+    languages: ["all"]
+    description: "Uses DNS for data exfiltration or C2 communication"
+    user_message: "🟠 DNS TUNNELING! This script may use DNS queries to secretly send data past your firewall!"
+    match_patterns:
+      - pattern: "dns.*tunnel"
+        type: "regex"
+      - pattern: "dnscat"
+        type: "literal"
+      - pattern: "iodine"
+        type: "literal"
+    mitre_attack: "T1071.004"
+    false_positive_note: "Legitimate DNS libraries don't use these terms"
+
+  - id: "NET-TOR-001"
+    name: "Tor Network Connection"
+    category: "network"
+    subcategory: "anonymization"
+    severity: "medium"
+    weight: 65
+    languages: ["all"]
+    description: "Connects through Tor network to hide identity"
+    user_message: "🟠 TOR NETWORK! This script routes traffic through Tor — hiding the destination of data transfers"
+    match_patterns:
+      - pattern: "\\.onion"
+        type: "literal"
+      - pattern: "socks5.*127\\.0\\.0\\.1.*9050"
+        type: "regex"
+      - pattern: "torify"
+        type: "literal"
+    mitre_attack: "T1090"
+    false_positive_note: "Some privacy tools use Tor legitimately"
+
+  - id: "NET-EXFIL-001"
+    name: "Large Data Upload Pattern"
+    category: "exfiltration"
+    subcategory: "data_upload"
+    severity: "medium"
+    weight: 60
+    languages: ["all"]
+    description: "Uploads large amounts of data to external location"
+    user_message: "🟡 This script uploads data to an external server — check what data is being sent"
+    match_patterns:
+      - pattern: "requests\\.post.*files"
+        type: "regex"
+      - pattern: "urllib.*upload"
+        type: "regex"
+    mitre_attack: "T1041"
+    false_positive_note: "Common in legitimate file upload functionality"
+
+  - id: "NET-NGROK-001"
+    name: "Ngrok Tunnel (Expose Local Server)"
+    category: "network"
+    subcategory: "tunneling"
+    severity: "medium"
+    weight: 55
+    languages: ["all"]
+    description: "Creates ngrok tunnel to expose local services to the internet"
+    user_message: "🟡 TUNNEL CREATED! This script exposes your computer to the internet via ngrok — potential security risk"
+    match_patterns:
+      - pattern: "ngrok"
+        type: "literal"
+      - pattern: "pyngrok"
+        type: "literal"
+    mitre_attack: "T1572"
+    false_positive_note: "Developers use ngrok legitimately for testing"
+
+  - id: "NET-IRC-001"
+    name: "IRC Bot Pattern"
+    category: "network"
+    subcategory: "irc_bot"
+    severity: "high"
+    weight: 70
+    languages: ["all"]
+    description: "IRC-based botnet communication pattern"
+    user_message: "🟠 IRC BOT! This script appears to be an IRC bot — commonly used for botnet command and control!"
+    match_patterns:
+      - pattern: "irc\\.connect"
+        type: "regex"
+      - pattern: "PRIVMSG.*#"
+        type: "regex"
+    mitre_attack: "T1071"
+    false_positive_note: "Legitimate IRC clients exist"

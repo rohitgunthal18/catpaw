@@ -1,0 +1,33 @@
+Metadata-Version: 2.4
+Name: reposentinel
+Version: 1.0.0
+Summary: GitHub Repository Malicious Code Scanner — Protect yourself from malicious scripts
+Author: RepoSentinel Team
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Security
+Classifier: Topic :: Software Development :: Quality Assurance
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: click>=8.1.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: gitpython>=3.1.0
+Requires-Dist: pyyaml>=6.0.0
+Requires-Dist: requests>=2.31.0
+Dynamic: author
+Dynamic: classifier
+Dynamic: description-content-type
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

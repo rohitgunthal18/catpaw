@@ -1,0 +1,146 @@
+patterns:
+  - id: "PERS-CRON-001"
+    name: "Crontab Modification"
+    category: "persistence"
+    subcategory: "cron"
+    severity: "high"
+    weight: 75
+    languages: ["shell", "python"]
+    description: "Modifies crontab for scheduled execution persistence"
+    user_message: "🟠 PERSISTENCE! This script schedules itself to run automatically on a timer!"
+    match_patterns:
+      - pattern: "crontab"
+        type: "literal"
+      - pattern: "/etc/cron\\.d/"
+        type: "regex"
+      - pattern: "/var/spool/cron"
+        type: "literal"
+    mitre_attack: "T1053.003"
+    false_positive_note: "Some setup scripts legitimately add cron jobs"
+
+  - id: "PERS-REG-001"
+    name: "Windows Run Key Persistence"
+    category: "persistence"
+    subcategory: "registry"
+    severity: "critical"
+    weight: 85
+    languages: ["python", "powershell"]
+    description: "Adds to Windows Registry Run key for startup persistence"
+    user_message: "🔴 PERSISTENCE! Adds itself to Windows startup — runs every time you log in!"
+    match_patterns:
+      - pattern: "CurrentVersion\\\\Run"
+        type: "literal"
+      - pattern: "HKCU.*Software.*Microsoft.*Windows.*CurrentVersion.*Run"
+        type: "regex"
+      - pattern: "HKLM.*Software.*Microsoft.*Windows.*CurrentVersion.*Run"
+        type: "regex"
+    mitre_attack: "T1547.001"
+    false_positive_note: "Some installers add Run keys legitimately"
+
+  - id: "PERS-START-001"
+    name: "Windows Startup Folder"
+    category: "persistence"
+    subcategory: "startup_folder"
+    severity: "critical"
+    weight: 80
+    languages: ["python", "powershell", "shell"]
+    description: "Places files in Windows Startup folder"
+    user_message: "🔴 PERSISTENCE! Places a file in your Windows Startup folder — runs on every login!"
+    match_patterns:
+      - pattern: "Start Menu.*Programs.*Startup"
+        type: "regex"
+      - pattern: "shell:startup"
+        type: "literal"
+      - pattern: "AppData.*Roaming.*Microsoft.*Windows.*Start Menu.*Programs.*Startup"
+        type: "regex"
+    mitre_attack: "T1547.001"
+    false_positive_note: "Some legitimate installers use Startup folder"
+
+  - id: "PERS-SYSD-001"
+    name: "Systemd Service Creation"
+    category: "persistence"
+    subcategory: "systemd"
+    severity: "critical"
+    weight: 80
+    languages: ["shell", "python"]
+    description: "Creates a systemd service for persistent background execution"
+    user_message: "🔴 PERSISTENCE! Installs a system service — runs in background permanently even after reboot!"
+    match_patterns:
+      - pattern: "/etc/systemd/system/.*\\.service"
+        type: "regex"
+      - pattern: "systemctl\\s+(enable|start)"
+        type: "regex"
+    mitre_attack: "T1543.002"
+    false_positive_note: "Legitimate server software installs services"
+
+  - id: "PERS-LAUNCH-001"
+    name: "macOS LaunchAgent Persistence"
+    category: "persistence"
+    subcategory: "launch_agent"
+    severity: "critical"
+    weight: 80
+    languages: ["shell", "python"]
+    description: "Creates macOS LaunchAgent for login persistence"
+    user_message: "🔴 PERSISTENCE! Creates a macOS LaunchAgent — runs every time you log into your Mac!"
+    match_patterns:
+      - pattern: "Library/LaunchAgents"
+        type: "literal"
+      - pattern: "Library/LaunchDaemons"
+        type: "literal"
+      - pattern: "launchctl\\s+load"
+        type: "regex"
+    mitre_attack: "T1543.001"
+    false_positive_note: "Legitimate macOS apps use LaunchAgents"
+
+  - id: "PERS-SSH-001"
+    name: "SSH authorized_keys Injection"
+    category: "persistence"
+    subcategory: "ssh_backdoor"
+    severity: "critical"
+    weight: 85
+    languages: ["shell", "python"]
+    description: "Injects SSH keys for persistent unauthorized access"
+    user_message: "🔴 SSH BACKDOOR! Adds an attacker's SSH key — they can log into your system anytime!"
+    match_patterns:
+      - pattern: "authorized_keys"
+        type: "literal"
+    mitre_attack: "T1098.004"
+    false_positive_note: "Deployment scripts may add keys"
+
+  - id: "PERS-WMI-001"
+    name: "WMI Event Subscription"
+    category: "persistence"
+    subcategory: "wmi"
+    severity: "critical"
+    weight: 85
+    languages: ["powershell"]
+    description: "Creates WMI event subscription — nearly invisible persistence"
+    user_message: "🔴 STEALTHY PERSISTENCE! WMI event subscription is almost undetectable by the user!"
+    match_patterns:
+      - pattern: "__EventFilter"
+        type: "literal"
+      - pattern: "CommandLineEventConsumer"
+        type: "literal"
+      - pattern: "Set-WmiInstance"
+        type: "literal"
+    mitre_attack: "T1546.003"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "PERS-DLL-001"
+    name: "DLL Hijacking Setup"
+    category: "persistence"
+    subcategory: "dll_hijacking"
+    severity: "critical"
+    weight: 85
+    languages: ["python", "powershell"]
+    description: "Places DLLs in directories for hijacking — code runs when legit apps load"
+    user_message: "🔴 DLL HIJACKING! Places a malicious DLL where legitimate programs will load it!"
+    match_patterns:
+      - pattern: "\\.dll.*System32"
+        type: "regex"
+      - pattern: "DllMain"
+        type: "literal"
+      - pattern: "copy.*\\.dll"
+        type: "regex"
+    mitre_attack: "T1574.001"
+    false_positive_note: "Some software legitimately installs DLLs"

@@ -1,0 +1,126 @@
+patterns:
+  - id: "MINE-PROTO-001"
+    name: "Stratum Mining Protocol"
+    category: "impact"
+    subcategory: "cryptomining"
+    severity: "critical"
+    weight: 85
+    languages: ["all"]
+    description: "Uses Stratum protocol to connect to mining pools"
+    user_message: "🔴 CRYPTOMINER! This script mines cryptocurrency using your computer's resources!"
+    match_patterns:
+      - pattern: "stratum\\+tcp://"
+        type: "literal"
+      - pattern: "stratum\\+ssl://"
+        type: "literal"
+    mitre_attack: "T1496"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "MINE-POOL-001"
+    name: "Mining Pool Domain Connection"
+    category: "impact"
+    subcategory: "cryptomining"
+    severity: "critical"
+    weight: 85
+    languages: ["all"]
+    description: "Connects to known cryptocurrency mining pools"
+    user_message: "🔴 MINING POOL DETECTED! This script connects to cryptocurrency mining pools!"
+    match_patterns:
+      - pattern: "pool\\.minexmr\\.com"
+        type: "literal"
+      - pattern: "pool\\.supportxmr\\.com"
+        type: "literal"
+      - pattern: "nanopool\\.org"
+        type: "literal"
+      - pattern: "hashvault\\.pro"
+        type: "literal"
+      - pattern: "2miners\\.com"
+        type: "literal"
+      - pattern: "herominers\\.com"
+        type: "literal"
+    mitre_attack: "T1496"
+    false_positive_note: "No legitimate use"
+
+  - id: "MINE-BIN-001"
+    name: "Mining Binary Download"
+    category: "impact"
+    subcategory: "cryptomining"
+    severity: "critical"
+    weight: 90
+    languages: ["all"]
+    description: "Downloads known cryptocurrency mining binaries"
+    user_message: "🔴 MINER DOWNLOAD! This script downloads cryptocurrency mining software to your computer!"
+    match_patterns:
+      - pattern: "xmrig"
+        type: "literal"
+      - pattern: "cpuminer"
+        type: "literal"
+      - pattern: "bfgminer"
+        type: "literal"
+      - pattern: "cgminer"
+        type: "literal"
+      - pattern: "minerd"
+        type: "literal"
+    mitre_attack: "T1496"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "MINE-HASH-001"
+    name: "Hash Rate / Mining References"
+    category: "impact"
+    subcategory: "cryptomining"
+    severity: "high"
+    weight: 65
+    languages: ["all"]
+    description: "Contains references to hash rates and mining performance"
+    user_message: "🟠 This script references hash rates/mining performance — possible cryptomining component"
+    match_patterns:
+      - pattern: "hashrate"
+        type: "literal"
+      - pattern: "hash_rate"
+        type: "literal"
+      - pattern: "hashes_per_second"
+        type: "literal"
+      - pattern: "RandomX"
+        type: "literal"
+    mitre_attack: "T1496"
+    false_positive_note: "Blockchain research tools may reference hash rates"
+
+  - id: "MINE-COINHIVE-001"
+    name: "Browser Mining Script"
+    category: "impact"
+    subcategory: "browser_mining"
+    severity: "critical"
+    weight: 85
+    languages: ["javascript"]
+    description: "Embeds browser-based cryptocurrency mining in web pages"
+    user_message: "🔴 BROWSER MINER! This web script mines cryptocurrency using your browser — slows your computer!"
+    match_patterns:
+      - pattern: "CoinHive"
+        type: "literal"
+      - pattern: "coinhive\\.min\\.js"
+        type: "literal"
+      - pattern: "deepMiner"
+        type: "literal"
+      - pattern: "cryptonight\\.wasm"
+        type: "literal"
+    mitre_attack: "T1496"
+    false_positive_note: "No legitimate use"
+
+  - id: "MINE-WALLET-001"
+    name: "Cryptocurrency Wallet Addresses"
+    category: "impact"
+    subcategory: "cryptomining"
+    severity: "medium"
+    weight: 55
+    languages: ["all"]
+    description: "Contains hardcoded cryptocurrency wallet addresses (mining payout targets)"
+    user_message: "🟡 This script contains cryptocurrency wallet addresses — may be mining payouts or theft targets"
+    match_patterns:
+      - pattern: "\\b4[0-9A-Za-z]{94}\\b"
+        type: "regex"
+      - pattern: "\\bbc1q[a-z0-9]{38,}\\b"
+        type: "regex"
+      - pattern: "\\b0x[0-9a-fA-F]{40}\\b"
+        type: "regex"
+    mitre_attack: "T1496"
+    false_positive_note: "Legitimate crypto applications contain wallet addresses"

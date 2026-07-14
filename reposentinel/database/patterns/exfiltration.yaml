@@ -1,0 +1,161 @@
+patterns:
+  - id: "EXFIL-WEBHOOK-001"
+    name: "Discord Webhook Exfiltration"
+    category: "exfiltration"
+    subcategory: "webhook"
+    severity: "critical"
+    weight: 85
+    languages: ["all"]
+    description: "Sends stolen data via Discord webhook"
+    user_message: "🔴 DATA THEFT! Sends your stolen data to a Discord webhook controlled by the attacker!"
+    match_patterns:
+      - pattern: "discord\\.com/api/webhooks"
+        type: "literal"
+      - pattern: "discordapp\\.com/api/webhooks"
+        type: "literal"
+    mitre_attack: "T1567"
+    false_positive_note: "Some bots legitimately post to Discord"
+
+  - id: "EXFIL-WEBHOOK-002"
+    name: "Slack Webhook Exfiltration"
+    category: "exfiltration"
+    subcategory: "webhook"
+    severity: "high"
+    weight: 80
+    languages: ["all"]
+    description: "Sends data via Slack webhook"
+    user_message: "🟠 This script sends data to a Slack webhook — verify this is expected behavior"
+    match_patterns:
+      - pattern: "hooks\\.slack\\.com/services"
+        type: "literal"
+    mitre_attack: "T1567"
+    false_positive_note: "Monitoring tools legitimately post to Slack"
+
+  - id: "EXFIL-WEBHOOK-003"
+    name: "Telegram Bot Exfiltration"
+    category: "exfiltration"
+    subcategory: "webhook"
+    severity: "critical"
+    weight: 85
+    languages: ["all"]
+    description: "Sends stolen data via Telegram bot API"
+    user_message: "🔴 DATA THEFT! Sends your data to an attacker's Telegram bot!"
+    match_patterns:
+      - pattern: "api\\.telegram\\.org/bot"
+        type: "literal"
+    mitre_attack: "T1102"
+    false_positive_note: "Legitimate Telegram bots exist"
+
+  - id: "EXFIL-EMAIL-001"
+    name: "SMTP Email Exfiltration"
+    category: "exfiltration"
+    subcategory: "email"
+    severity: "high"
+    weight: 75
+    languages: ["python"]
+    description: "Sends data via email using SMTP"
+    user_message: "🟠 This script sends emails with attachments — could be exfiltrating your files via email!"
+    match_patterns:
+      - pattern: "smtplib\\.SMTP"
+        type: "literal"
+      - pattern: "smtp\\.sendmail"
+        type: "regex"
+      - pattern: "MIMEMultipart"
+        type: "literal"
+    mitre_attack: "T1048.003"
+    false_positive_note: "Legitimate scripts send emails"
+
+  - id: "EXFIL-FTP-001"
+    name: "FTP Upload Exfiltration"
+    category: "exfiltration"
+    subcategory: "ftp"
+    severity: "high"
+    weight: 70
+    languages: ["python", "shell"]
+    description: "Uploads files to external FTP server"
+    user_message: "🟠 This script uploads files to an FTP server — your data could be sent to an attacker!"
+    match_patterns:
+      - pattern: "ftplib\\.FTP"
+        type: "literal"
+      - pattern: "ftp\\.storbinary"
+        type: "regex"
+      - pattern: "ftp\\s+-n.*<<.*put"
+        type: "regex"
+    mitre_attack: "T1048"
+    false_positive_note: "Some tools legitimately upload to FTP"
+
+  - id: "EXFIL-PASTE-001"
+    name: "Pastebin Data Upload"
+    category: "exfiltration"
+    subcategory: "paste_site"
+    severity: "high"
+    weight: 80
+    languages: ["all"]
+    description: "Uploads data to paste sites for retrieval by attacker"
+    user_message: "🟠 This script uploads data to Pastebin — attacker may retrieve your data from there!"
+    match_patterns:
+      - pattern: "pastebin\\.com/api"
+        type: "literal"
+      - pattern: "hastebin\\.com"
+        type: "literal"
+      - pattern: "paste\\.ee"
+        type: "literal"
+    mitre_attack: "T1567"
+    false_positive_note: "Some tools use paste sites for logs"
+
+  - id: "EXFIL-CRED-001"
+    name: "Credential Harvest + Send"
+    category: "exfiltration"
+    subcategory: "credential_exfil"
+    severity: "critical"
+    weight: 95
+    languages: ["all"]
+    description: "Harvests credentials and sends them to an external server"
+    user_message: "🔴 CREDENTIAL THEFT! This script steals your passwords/credentials and sends them to an attacker!"
+    match_patterns:
+      - pattern: "password.*requests\\.post"
+        type: "regex"
+      - pattern: "credentials.*send"
+        type: "regex"
+      - pattern: "Login Data.*requests"
+        type: "regex"
+    mitre_attack: "T1041"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "EXFIL-SCREEN-001"
+    name: "Screenshot + Send"
+    category: "exfiltration"
+    subcategory: "screen_exfil"
+    severity: "critical"
+    weight: 85
+    languages: ["python"]
+    description: "Takes screenshots and sends them to external server"
+    user_message: "🔴 SPYING! This script screenshots your screen and sends images to an attacker!"
+    match_patterns:
+      - pattern: "screenshot.*send"
+        type: "regex"
+      - pattern: "ImageGrab.*post"
+        type: "regex"
+      - pattern: "pyautogui.*upload"
+        type: "regex"
+    mitre_attack: "T1113"
+    false_positive_note: "No legitimate use in user scripts"
+
+  - id: "EXFIL-SYS-001"
+    name: "System Info Collection + Send"
+    category: "exfiltration"
+    subcategory: "recon_exfil"
+    severity: "high"
+    weight: 70
+    languages: ["python", "powershell", "shell"]
+    description: "Collects system information and exfiltrates it"
+    user_message: "🟠 This script collects your system info (OS, IP, username) and sends it externally!"
+    match_patterns:
+      - pattern: "platform\\.uname.*requests\\.post"
+        type: "regex"
+      - pattern: "getlogin.*send"
+        type: "regex"
+      - pattern: "hostname.*curl"
+        type: "regex"
+    mitre_attack: "T1082"
+    false_positive_note: "Telemetry tools collect system info legitimately"
